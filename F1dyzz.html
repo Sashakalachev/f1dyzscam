@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1DUZZ SHOP</title>
+    <style>
+        /* --- ОСНОВНЫЕ СТИЛИ --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121214;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .promo-banner {
+            width: 100%;
+            background: linear-gradient(90deg, #ff8c00, #ff0055);
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+            animation: pulse 2s infinite;
+            z-index: 100;
+            position: relative;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(255, 140, 0, 0.8); }
+            100% { box-shadow: 0 0 10px rgba(255, 0, 85, 0.5); }
+        }
+
+        h1 {
+            margin-top: 40px;
+            font-size: 3rem;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .top-bar {
+            width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .balance {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            border: 2px solid #ffd700;
+            padding: 5px 15px;
+            border-radius: 5px;
+            background: #2a2a35;
+        }
+
+        .control-buttons button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            margin-left: 10px;
+            background: #555;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.2s;
+        }
+
+        .control-buttons button:hover {
+            background: #777;
+        }
+        
+        /* --- РУЛЕТКА --- */
+        .roulette-wrapper {
+            position: relative;
+            width: 800px;
+            height: 200px;
+            background: #1e1e24;
+            margin: 30px auto;
+            border-radius: 10px;
+            border: 2px solid #333;
+            overflow: hidden; 
+            box-shadow: inset 0 0 20px #000;
+        }
+
+        .cursor {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: #ffd700;
+            z-index: 10;
+            box-shadow: 0 0 10px #ffd700;
+        }
+        .cursor::after { 
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -8px;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #ffd700;
+        }
+
+        .items-strip {
+            display: flex;
+            height: 100%;
+            align-items: center;
+            position: relative;
+            left: 0;
+            will-change: transform; 
+        }
+
+        .item-card {
+            min-width: 150px;
+            height: 150px;
+            margin: 0 5px;
+            background: #2a2a35;
+            border-bottom: 4px solid #555;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ddd;
+            font-weight: bold;
+            position: relative;
+            border-radius: 4px;
+            padding: 10px 0;
+            box-sizing: border-box;
+        }
+
+        .item-card img {
+            width: 140px; 
+            height: 110px; 
+            object-fit: contain;
+            margin-bottom: 2px;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+        }
+        
+        .item-card > div:last-child {
+            font-size: 11px; 
+            text-align: center;
+            padding: 0 5px;
+            max-width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        /* --- КНОПКА СПИНА --- */
+        .btn-spin {
+            padding: 15px 60px;
+            font-size: 1.5rem;
+            background: #28a745;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            text-transform: uppercase;
+            transition: 0.2s;
+            box-shadow: 0 5px 0 #1e7e34;
+        }
+
+        .btn-spin:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #1e7e34;
+        }
+        
+        .btn-spin:disabled {
+            background: #555;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .result-message {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            height: 30px;
+            color: #ffd700;
+        }
+
+        /* --- МОДАЛЬНОЕ ОКНО (МАГАЗИН) --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #1e1e24;
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #inventory-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .inventory-item {
+            width: 150px; 
+            background: #2a2a35;
+            padding: 10px;
+            border-radius: 5px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .inventory-item img {
+            width: 100px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        .inventory-item button {
+            margin-top: 8px;
+            padding: 5px 10px;
+            background: #dc3545;
+            border: none;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        
+        /* --- КЛАССЫ РЕДКОСТИ FORTNITE (Стилизация инвентаря) --- */
+        .rarity-icon { border-color: #ffd700; border-bottom: 4px solid #ffd700;} 
+        .rarity-mythic { border-color: #eb4b4b; border-bottom: 4px solid #eb4b4b;}    
+        .rarity-legendary { border-color: #d32ce6; border-bottom: 4px solid #d32ce6;} 
+        .rarity-epic { border-color: #8847ff; border-bottom: 4px solid #8847ff;}      
+        .rarity-rare { border-color: #4b69ff; border-bottom: 4px solid #4b69ff;}      
+        .rarity-uncommon { border-color: #51ac4b; border-bottom: 4px solid #51ac4b;} 
+        .rarity-common { border-color: #a9a9a9; border-bottom: 4px solid #a9a9a9;} 
+
+    </style>
+</head>
+<body>
+
+    <div class="promo-banner">
+        🔥 F1DUZZ SHOP 🔥
+    </div>
+
+    <h1>СИМУЛЯТОР КЕЙСОВ</h1>
+
+    <div class="top-bar">
+        <div class="balance" id="rubles">Баланс: 1000 ₽</div>
+        <div class="control-buttons">
+            <button onclick="openDepButton()">ДЕПНИ БРАТА</button>
+            <button onclick="openModal()">МАГАЗИН</button>
+        </div>
+    </div>
+
+    <div class="roulette-wrapper">
+        <div class="cursor"></div>
+        <div class="items-strip" id="strip">
+            </div>
+    </div>
+
+    <button class="btn-spin" id="spinBtn" onclick="spin()">
+        ОТКРЫТЬ КЕЙС (100 ₽)
+    </button>
+
+    <div class="result-message" id="resultMsg">Начни тратить рубли!</div>
+
+    <div id="shopModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>ТВОЙ ИНВЕНТАРЬ</h2>
+        <div id="inventory-grid">
+            </div>
+      </div>
+    </div>
+    
+    <div id="depModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeDepButton()">&times;</span>
+        <h2>ДЕПНИ БРАТА!</h2>
+        <p style="font-size: 1.2rem;">
+            Игорь гей Закинь 1000 ₽ на карту, чтобы я мог продолжить открывать кейсы и наконец выбить Красного Рыцаря. ИГОРЬ ЛОХ ИГОРЬ ЛОХ ИГОРЬ ЛОХ
+            <br><br>
+            *Собранные рубли: <span id="depCount">0</span>*
+        </p>
+        <button style="background: #007bff; margin-top: 20px; padding: 10px 20px;" onclick="addRubles(1000)">ЗАДОНАТИТЬ 1000 ₽</button>
+      </div>
+    </div>
+
+    <script>
+        const strip = document.getElementById('strip');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultMsg = document.getElementById('resultMsg');
+        const rublesDisplay = document.getElementById('rubles');
+        const shopModal = document.getElementById('shopModal');
+        const depModal = document.getElementById('depModal');
+        const inventoryGrid = document.getElementById('inventory-grid');
+        const depCountDisplay = document.getElementById('depCount');
+        
+        let rubles = 1000;
+        let inventory = [];
+        let spinCost = 100;
+        let depCount = 0;
+
+        // --- ДАННЫЕ С 30 ЛОКАЛЬНЫМИ СКИНАМИ (СКОРРЕКТИРОВАННЫЕ ПУТИ) ---
+        const items = [
+            // ICON (1) - 0.02%
+            { id: 1, name: 'Travis Scott (Icon)', rarity: 'icon', src: './images/travis.jpg', weight: 0.02, sellPrice: 10000 }, 
+
+            // MYTHIC (2) - 0.18%
+            { id: 2, name: 'Midas (Мидас)', rarity: 'mythic', src: './images/midas.webp', weight: 0.09, sellPrice: 5000 },
+            { id: 3, name: 'Shadow Midas', rarity: 'mythic', src: './images/shadow_midas.jpeg', weight: 0.09, sellPrice: 5000 },
+
+            // LEGENDARY (4) - 0.80%
+            { id: 4, name: 'Raven (Ворон)', rarity: 'legendary', src: './images/raven.webp', weight: 0.20, sellPrice: 1500 },
+            { id: 5, name: 'Omega (Омега)', rarity: 'legendary', src: './images/omega.jpg', weight: 0.20, sellPrice: 1500 },
+            { id: 6, name: 'Black Knight', rarity: 'legendary', src: './images/black_knight.webp', weight: 0.20, sellPrice: 1500 },
+            { id: 7, name: 'Red Knight', rarity: 'legendary', src: './images/red_knight.webp', weight: 0.20, sellPrice: 1500 },
+
+            // EPIC (5) - 4.00%
+            { id: 8, name: 'Drift (Дрифт)', rarity: 'epic', src: './images/drift.webp', weight: 0.80, sellPrice: 500 },
+            { id: 9, name: 'Skull Trooper', rarity: 'epic', src: './images/skull_trooper.webp', weight: 0.80, sellPrice: 500 },
+            { id: 10, name: 'Dark Voyager', rarity: 'epic', src: './images/dark_voyager.webp', weight: 0.80, sellPrice: 500 },
+            { id: 11, name: 'Dynamo', rarity: 'epic', src: './images/dynamo.jpg', weight: 0.80, sellPrice: 500 },
+            { id: 12, name: 'Rebirth Raven', rarity: 'epic', src: './images/rebirth_raven.webp', weight: 0.80, sellPrice: 500 },
+
+            // RARE (6) - 12.00%
+            { id: 13, name: 'Fishstick (Рыба-палка)', rarity: 'rare', src: './images/fishstick.webp', weight: 2.00, sellPrice: 150 },
+            { id: 14, name: 'Recon Expert', rarity: 'rare', src: './images/recon_expert.webp', weight: 2.00, sellPrice: 150 },
+            { id: 15, name: 'Aura (Аура)', rarity: 'rare', src: './images/aura.png', weight: 2.00, sellPrice: 150 },
+            { id: 16, name: 'Assault Trooper', rarity: 'rare', src: './images/assault_trooper.webp', weight: 2.00, sellPrice: 150 },
+            { id: 17, name: 'Focus', rarity: 'rare', src: './images/focus.webp', weight: 2.00, sellPrice: 150 },
+            { id: 18, name: 'Brite Bomber', rarity: 'rare', src: './images/brite_bomber.jpeg', weight: 2.00, sellPrice: 150 },
+            
+            // UNCOMMON (6) - 28.00%
+            { id: 19, name: 'Renegade', rarity: 'uncommon', src: './images/renegade.webp', weight: 4.67, sellPrice: 50 },
+            { id: 20, name: 'Clinical Crosser', rarity: 'uncommon', src: './images/clinical_crosser.webp', weight: 4.67, sellPrice: 50 },
+            { id: 21, name: 'Recon Scout', rarity: 'uncommon', src: './images/recon_scout.webp', weight: 4.67, sellPrice: 50 },
+            { id: 22, name: 'Scoundrel', rarity: 'uncommon', src: './images/scoundrel.webp', weight: 4.67, sellPrice: 50 },
+            { id: 23, name: 'Sparkplug', rarity: 'uncommon', src: './images/sparkplug.webp', weight: 4.67, sellPrice: 50 },
+            { id: 24, name: 'Sledgehammer', rarity: 'uncommon', src: './images/sledgehammer.webp', weight: 4.67, sellPrice: 50 },
+
+            // COMMON (6) - 55.00%
+            { id: 25, name: 'Jonesy The First', rarity: 'common', src: './images/jonesy.png', weight: 9.17, sellPrice: 10 },
+            { id: 26, name: 'Ramirez', rarity: 'common', src: './images/ramirez.webp', weight: 9.17, sellPrice: 10 },
+            { id: 27, name: 'Banshee', rarity: 'common', src: './images/banshee.webp', weight: 9.17, sellPrice: 10 },
+            { id: 28, name: 'Spitfire', rarity: 'common', src: './images/spitfire.webp', weight: 9.17, sellPrice: 10 },
+            { id: 29, name: 'Commando', rarity: 'common', src: './images/commando.webp', weight: 9.17, sellPrice: 10 },
+            { id: 30, name: 'Whiplash', rarity: 'common', src: './images/whiplash.webp', weight: 9.17, sellPrice: 10 }
+        ];
+
+        // Параметры рулетки
+        const CARD_WIDTH = 160; 
+
+        // --- ФУНКЦИИ ЭКОНОМИКИ И МАГАЗИНА ---
+
+        function updateRubles() {
+            rublesDisplay.innerText = `Баланс: ${rubles.toFixed(0)} ₽`;
+            if (rubles < spinCost) {
+                spinBtn.disabled = true;
+                spinBtn.innerText = `НЕТ ДЕНЕГ (100 ₽)`;
+            } else {
+                spinBtn.disabled = false;
+                spinBtn.innerText = `ОТКРЫТЬ КЕЙС (100 ₽)`;
+            }
+        }
+        
+        function getWeightedRandomItem(items) {
+            let totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
+            let randomNum = Math.random() * totalWeight;
+
+            for (let item of items) {
+                if (randomNum < item.weight) {
+                    return {...item}; // Возвращаем копию для инвентаря
+                }
+                randomNum -= item.weight;
+            }
+            return {...items[items.length - 1]};
+        }
+
+        function createCardHTML(item) {
+            return `
+                <div class="item-card rarity-${item.rarity}">
+                    <img src="${item.src}" alt="${item.name}">
+                    <div>${item.name}</div>
+                </div>
+            `;
+        }
+        
+        function generateStrip() {
+            let html = '';
+            for(let i=0; i < 60; i++) {
+                const randomItem = getWeightedRandomItem(items);
+                html += createCardHTML(randomItem);
+            }
+            strip.innerHTML = html;
+        }
+
+        function getRarityColor(rarity) {
+            switch(rarity) {
+                case 'icon': return '#ffd700';
+                case 'mythic': return '#eb4b4b';
+                case 'legendary': return '#d32ce6';
+                case 'epic': return '#8847ff';
+                case 'rare': return '#4b69ff';
+                case 'uncommon': return '#51ac4b'; 
+                default: return '#a9a9a9';
+            }
+        }
+
+        // --- ФУНКЦИИ МОДАЛЬНЫХ ОКОН ---
+
+        function openModal() {
+            renderInventory();
+            shopModal.style.display = 'block';
+        }
+
+        function closeModal() {
+            shopModal.style.display = 'none';
+        }
+        
+        function openDepButton() {
+            depModal.style.display = 'block';
+        }
+
+        function closeDepButton() {
+            depModal.style.display = 'none';
+        }
+
+        function addRubles(amount) {
+            rubles += amount;
+            depCount++;
+            depCountDisplay.innerText = depCount;
+            updateRubles();
+        }
+
+        function renderInventory() {
+            inventoryGrid.innerHTML = ''; // Очистка
+            
+            if (inventory.length === 0) {
+                inventoryGrid.innerHTML = '<p style="color: #888;">Инвентарь пуст. Открой кейс, чтобы что-то получить!</p>';
+                return;
+            }
+
+            // Группировка по имени
+            const groupedInventory = inventory.reduce((acc, item) => {
+                const key = item.name;
+                if (!acc[key]) {
+                    acc[key] = { ...item, count: 0, rarityName: getRarityName(item.rarity) };
+                }
+                acc[key].count++;
+                return acc;
+            }, {});
+
+            for (const key in groupedInventory) {
+                const item = groupedInventory[key];
+                const itemElement = document.createElement('div');
+                itemElement.className = `inventory-item rarity-${item.rarity}`;
+                itemElement.innerHTML = `
+                    <img src="${item.src}" alt="${item.name}">
+                    <div style="font-size: 13px;">${item.name}</div>
+                    <div style="font-size: 11px; color: ${getRarityColor(item.rarity)};">${item.rarityName}</div>
+                    <div style="font-weight: normal;">Кол-во: ${item.count}</div>
+                    <button onclick="sellItem('${item.name}', ${item.sellPrice})">
+                        Продать за ${item.sellPrice} ₽
+                    </button>
+                `;
+                inventoryGrid.appendChild(itemElement);
+            }
+        }
+        
+        function getRarityName(rarity) {
+            switch(rarity) {
+                case 'icon': return 'Icon (Золотой)';
+                case 'mythic': return 'Mythic (Красный)';
+                case 'legendary': return 'Legendary (Розовый)';
+                case 'epic': return 'Epic (Фиолетовый)';
+                case 'rare': return 'Rare (Синий)';
+                case 'uncommon': return 'Uncommon (Зеленый)'; 
+                default: return 'Common (Серый)';
+            }
+        }
+
+        function sellItem(itemName, price) {
+            // Ищем первый экземпляр этого скина
+            const index = inventory.findIndex(item => item.name === itemName);
+
+            if (index !== -1) {
+                inventory.splice(index, 1); // Удаляем один элемент из инвентаря
+                rubles += price;
+                updateRubles();
+                renderInventory(); // Обновляем магазин
+                resultMsg.innerText = `✅ Продано: ${itemName} за ${price} ₽`;
+                resultMsg.style.color = '#28a745';
+            }
+        }
+
+        // --- ЛОГИКА ПРОКРУТКИ ---
+        function spin() {
+            if (rubles < spinCost) {
+                resultMsg.innerText = '⚠️ Недостаточно рублей!';
+                resultMsg.style.color = '#dc3545';
+                return;
+            }
+
+            rubles -= spinCost;
+            updateRubles();
+
+            spinBtn.disabled = true;
+            resultMsg.innerText = 'Крутится...';
+            resultMsg.style.color = '#fff';
+            
+            const winningIndex = 50; 
+            const winner = getWeightedRandomItem(items);
+            
+            // Добавляем победителя в инвентарь
+            inventory.push(winner);
+            
+            let newHtml = '';
+            for(let i=0; i < 60; i++) {
+                if (i === winningIndex) {
+                    newHtml += createCardHTML(winner);
+                } else {
+                    newHtml += createCardHTML(getWeightedRandomItem(items));
+                }
+            }
+            strip.innerHTML = newHtml;
+            
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateX(0px)';
+            strip.offsetHeight; 
+            
+            const randomOffset = Math.floor(Math.random() * 100) - 50;
+            const containerWidth = 800;
+            
+            const scrollPosition = (winningIndex * CARD_WIDTH) - (containerWidth / 2) + (CARD_WIDTH / 2) + randomOffset;
+
+            strip.style.transition = 'transform 5s cubic-bezier(0.15, 0.2, 0.1, 1.0)';
+            strip.style.transform = `translateX(-${scrollPosition}px)`;
+
+            setTimeout(() => {
+                spinBtn.disabled = false;
+                resultMsg.innerText = `🎁 ВЫПАЛО: ${winner.name} 🎁`;
+                resultMsg.style.color = getRarityColor(winner.rarity);
+                updateRubles();
+            }, 5000); 
+        }
+        
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        document.addEventListener('DOMContentLoaded', () => {
+            generateStrip();
+            updateRubles();
+        });
+        
+        // Закрытие модальных окон по клику вне их области
+        window.onclick = function(event) {
+            if (event.target == shopModal) {
+                closeModal();
+            }
+             if (event.target == depModal) {
+                closeDepButton();
+            }
+        }
+
+    </script>
+</body>
+</html>
